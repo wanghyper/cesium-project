@@ -1,4 +1,4 @@
-import {GeoJsonDataSource, useCesium} from '../../Cesium';
+import {GeoJsonDataSource, useCesium} from '../../Cesium/index.ts';
 import {Cartesian3} from 'cesium';
 
 export default function GeoJson() {

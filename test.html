@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="progress-container">
+        <canvas id="progress-canvas"></canvas>
+    </div>
+
+    <style>
+        .progress-container {
+            width: 300px;
+            height: 20px;
+            background-color: #ccc;
+            position: relative;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+
+    <script>
+        // 获取Canvas元素和上下文
+        var canvas = document.getElementById('progress-canvas');
+        var ctx = canvas.getContext('2d');
+
+        // 设置Canvas的宽度和高度
+        canvas.width = 300;
+        canvas.height = 20;
+
+        // 定义变量，用于控制进度条的进度和水纹效果的位置
+        var progress = 0;
+        var waveOffset = 0;
+
+        // 定义水纹效果的函数
+        function drawWave() {
+            // 保存Canvas的状态
+            ctx.save();
+
+            // 设置绘制路径，使用正弦函数模拟水纹效果
+            ctx.beginPath();
+            ctx.moveTo(0, 10);
+            for (var i = 0; i < canvas.width; i++) {
+                ctx.lineTo(i, 10 + 5 * Math.sin(i / 20 + waveOffset));
+            }
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.lineTo(0, canvas.height);
+            ctx.closePath();
+
+            // 填充颜色并恢复Canvas的状态
+            ctx.fillStyle = 'rgba(52, 152, 219, 0.3)';
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // 定义绘制进度条的函数
+        function drawProgress() {
+            // 清空Canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 绘制水纹效果和进度条
+            drawWave();
+            ctx.fillStyle = 'rgb(52, 152, 219)';
+            ctx.fillRect(0, 0, canvas.width * progress / 100, canvas.height);
+
+            // 更新进度和水纹效果的位置
+            progress += 1;
+            waveOffset += 0.1;
+
+            // 如果进度小于100，继续执行动画
+            if (progress < 100) {
+                window.requestAnimationFrame(drawProgress);
+            }
+        }
+
+        // 启动动画
+        window.requestAnimationFrame(drawProgress);
+
+    </script>
+</body>
+
+</html>

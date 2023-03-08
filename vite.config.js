@@ -27,12 +27,13 @@ export default defineConfig({
             ],
         }),
     ],
+    
     server: {
         proxy: {
-            '/output': {
-                target: 'http://localhost:3001',
+            '/server': {
+                target: 'http://172.25.96.193:8080',
                 changeOrigin: true,
-                rewrite: path => path.replace(/^\/api/, ''),
+                rewrite: path => path.replace(/^\/server/, ''),
             },
         },
     },

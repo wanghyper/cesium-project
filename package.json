@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@dvgis/cesium-map": "^2.6.1",
-    "cesium": "^1.98.1",
+    "cesium": "1.70.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.8.1"

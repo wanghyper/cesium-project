@@ -1,12 +1,9 @@
 import {useEffect, useState} from 'react';
-import {useCesium} from '../../Cesium/context';
 import * as Cesium from 'cesium';
-import {useRef} from 'react';
 import {Primitive} from '../../Cesium';
-import c from './index.module.less';
 
 export default function GeometryInstance(props) {
-    const [data, setData] = useState();
+    const [data, setData] = useState<any>();
     // In this tileset every feature has an "element" property which is a global ID.
     // This property is used to associate features across different tiles and LODs.
     // Workaround until 3D Tiles has the concept of global batch ids: https://github.com/CesiumGS/3d-tiles/issues/265
@@ -65,16 +62,14 @@ export default function GeometryInstance(props) {
         console.log('onready');
     }
     return (
-        <>
-            <Primitive
-                geometryInstances={data}
-                onReady={onReady}
-                appearance={
-                    new Cesium.EllipsoidSurfaceAppearance({
-                        material: Cesium.Material.fromType('Color'),
-                    })
-                }
-            />
-        </>
+        <Primitive
+            geometryInstances={data}
+            onReady={onReady}
+            appearance={
+                new Cesium.EllipsoidSurfaceAppearance({
+                    material: Cesium.Material.fromType('Color'),
+                })
+            }
+        />
     );
 }

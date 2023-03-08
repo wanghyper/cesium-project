@@ -5,6 +5,6 @@ export const CesiumContext = createContext({});
 export const {Provider, Consumer} = CesiumContext;
 
 export function useCesium() {
-    const context = useContext(CesiumContext);
+    const context: any = useContext(CesiumContext);
     return context
 }

@@ -10,4 +10,7 @@ export {default as CesiumWidget} from './CesiumWidget';
 export {default as GeoJsonDataSource} from './GeoJsonDataSource';
 export {default as Primitive} from './Primitive';
 export {default as Cesium3DTileset} from './Cesium3DTileset';
+export {default as TDTImageryProvider} from './TDTImageryProvider';
+export {default as Terrain} from './Terrain';
+
 export {CesiumContext, Provider as CesiumProvider, Consumer as CesiumConsumer, useCesium} from './context';
