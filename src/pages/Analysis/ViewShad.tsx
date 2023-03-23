@@ -17,7 +17,7 @@ export default function ViewShade() {
             // 更改相机状态
             viewer.camera.flyToBoundingSphere(tileset.boundingSphere);
         });
-        let viewshad = null;
+        let viewshad: any = null;
         var handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
         handler.setInputAction(function (movement) {
             // // 椭球坐标

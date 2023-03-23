@@ -38,10 +38,10 @@ class ViewShedStage {
     softShadows;
     size;
     shadowMap: any;
-    sketch;
-    frustumOutline;
-    postStage;
-    lightCamera;
+    sketch = null;
+    frustumOutline = null;
+    postStage = null;
+    lightCamera: typeof Cesium.Camera;
     constructor(viewer, options) {
         this.viewer = viewer;
         this.viewPosition = options.viewPosition;
@@ -80,7 +80,6 @@ class ViewShedStage {
     }
 
     clear() {
-        console.log('clear')
         if (this.sketch) {
             this.viewer.entities.removeById(this.sketch.id);
             this.sketch = null;
@@ -138,7 +137,7 @@ class ViewShedStage {
         });
         this.viewer.scene.shadowMap = this.shadowMap;
     }
-
+    // 后处理阶段
     createPostStage() {
         const fs = glsl;
         const postStage = new Cesium.PostProcessStage({
@@ -194,9 +193,9 @@ class ViewShedStage {
         });
         this.postStage = this.viewer.scene.postProcessStages.add(postStage);
     }
-
+    // 绘制椎体轮廓
     drawFrustumOutline() {
-        const scratchRight = new Cesium.Cartesian3();
+        const scratchRight = new Cesium.Cartesian3(); // 笛卡尔坐标点
         const scratchRotation = new Cesium.Matrix3();
         const scratchOrientation = new Cesium.Quaternion();
         const position = this.lightCamera.positionWC;
@@ -243,8 +242,9 @@ class ViewShedStage {
                 this.viewPosition,
                 Cesium.HeadingPitchRoll.fromDegrees(this.viewHeading - this.horizontalViewAngle, this.viewPitch, 0.0)
             ),
+            // 椭球体属性 https://www.vvpstk.com/public/Cesium/Documentation/EllipsoidGraphics.html
             ellipsoid: {
-                radii: new Cesium.Cartesian3(this.viewDistance, this.viewDistance, this.viewDistance),
+                radii: new Cesium.Cartesian3(this.viewDistance, this.viewDistance, this.viewDistance), // 指定椭球各轴长。
                 // innerRadii: new Cesium.Cartesian3(2.0, 2.0, 2.0),
                 minimumClock: Cesium.Math.toRadians(-this.horizontalViewAngle / 2),
                 maximumClock: Cesium.Math.toRadians(this.horizontalViewAngle / 2),

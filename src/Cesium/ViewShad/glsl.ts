@@ -2,7 +2,7 @@ export default `
  #define USE_CUBE_MAP_SHADOW true
  uniform sampler2D colorTexture;
  uniform sampler2D depthTexture;
- varying vec2 v_textureCoordinates;
+ in vec2 v_textureCoordinates;
  uniform mat4 camera_projection_matrix;
  uniform mat4 camera_view_matrix;
  uniform samplerCube shadowMap_textureCube;
@@ -13,6 +13,7 @@ export default `
  uniform float helsing_viewDistance;
  uniform vec4 helsing_visibleAreaColor;
  uniform vec4 helsing_invisibleAreaColor;
+ out vec4 vFragColor;
 
  struct zx_shadowParameters
  {
@@ -102,9 +103,9 @@ export default `
 
  void main(){
      // 釉色 = 结构二维(颜色纹理, 纹理坐标)
-     gl_FragColor = texture2D(colorTexture, v_textureCoordinates);
+     vFragColor = texture(colorTexture, v_textureCoordinates);
      // 深度 = 获取深度(结构二维(深度纹理, 纹理坐标))
-     float depth = getDepth(texture2D(depthTexture, v_textureCoordinates));
+     float depth = getDepth(texture(depthTexture, v_textureCoordinates));
      // 视角 = (纹理坐标, 深度)
      vec4 viewPos = toEye(v_textureCoordinates, depth);
      // 世界坐标
@@ -122,9 +123,9 @@ export default `
          if(visible(posInEye)){
              float vis = shadow(viewPos);
              if(vis > 0.3){
-                 gl_FragColor = mix(gl_FragColor,helsing_visibleAreaColor,.5);
+                 vFragColor = mix(vFragColor,helsing_visibleAreaColor,.5);
              } else{
-                 gl_FragColor = mix(gl_FragColor,helsing_invisibleAreaColor,.5);
+                 vFragColor = mix(vFragColor,helsing_invisibleAreaColor,.5);
              }
          }
      }
