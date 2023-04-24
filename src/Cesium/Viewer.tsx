@@ -1,4 +1,4 @@
-import {Viewer as CesiumViewer, Ion} from 'cesium';
+import {Viewer as CesiumViewer, CameraEventType, KeyboardEventModifier} from 'cesium';
 import {Provider} from './context';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 import React, {useEffect, useRef, useState} from 'react';
@@ -7,7 +7,7 @@ export default function Viewer(props: {
     options?: Record<string, any>;
     children?: React.ReactElement;
     style?: Record<string, any>;
-    onLoad?: (viewer: any) => void
+    onLoad?: (viewer: any) => void;
 }) {
     const {options = {}, children, style = {}, onLoad} = props;
     const idRef = useRef(Date.now() + '' + Math.random());
@@ -32,6 +32,27 @@ export default function Viewer(props: {
                 navigationInstructionsInitiallyVisible: false,
                 ...options,
             });
+            //设置中键放大缩小
+            viewer.scene.screenSpaceCameraController.zoomEventTypes = [
+                CameraEventType.WHEEL,
+                CameraEventType.MIDDLE_DRAG,
+                CameraEventType.PINCH,
+            ];
+            //设置右键旋转
+            viewer.scene.screenSpaceCameraController.tiltEventTypes = [
+                CameraEventType.RIGHT_DRAG,
+                CameraEventType.PINCH,
+
+                {
+                    eventType: CameraEventType.RIGHT_DRAG,
+                    modifier: KeyboardEventModifier.CTRL,
+                },
+
+                {
+                    eventType: CameraEventType.MIDDLE_DRAG,
+                    modifier: KeyboardEventModifier.CTRL,
+                },
+            ];
             // 隐藏logo
             viewer.cesiumWidget.creditContainer.style.display = 'none';
             provided.viewer = viewer;

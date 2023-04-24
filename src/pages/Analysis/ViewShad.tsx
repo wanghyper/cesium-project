@@ -1,19 +1,23 @@
 import {Viewer} from '../../Cesium';
 import * as Cesium from 'cesium';
 import ViewShedStage from '../../Cesium/ViewShad';
+import {translate3dtiles, update3dtilesMaxtrix} from '@/Cesium/utils/transform';
+import {useRef} from 'react';
 export default function ViewShade() {
+    const tileRef = useRef<any>();
     function init(viewer) {
         // 开启地形深度监测
         viewer.scene.globe.depthTestAgainstTerrain = true;
 
         // 加载3dtile模型
-        var tileset = new Cesium.Cesium3DTileset({
+        const tileset = (tileRef.current = new Cesium.Cesium3DTileset({
             url: 'http://earthsdk.com/v/last/Apps/assets/dayanta/tileset.json',
             // show: false
-        });
+        }));
         viewer.scene.primitives.add(tileset);
         tileset.readyPromise.then(function (argument) {
-            console.log(argument);
+            console.log(tileset);
+            tileset.modelMatrix = translate3dtiles({center: tileset.boundingSphere.center, height: -417});
             // 更改相机状态
             viewer.camera.flyToBoundingSphere(tileset.boundingSphere);
         });
@@ -50,48 +54,30 @@ export default function ViewShade() {
                 });
             }
         }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+        document.addEventListener('keydown', e => {
+            viewshad.updateLightCamera({
+                viewPosition: viewshad.viewPosition,
+                viewHeading: viewshad.viewHeading++,
+                viewPitch: viewshad.viewPitch,
+            });
+        });
     }
-    return <Viewer onLoad={init}></Viewer>;
+    function setTilesHeight(e: {target: HTMLInputElement}) {
+        console.log(e.target.value);
+        const tileset = tileRef.current;
+        tileset.modelMatrix = translate3dtiles({center: tileset.boundingSphere.center, height: Number(e.target.value)});
+    }
+    return (
+        <Viewer onLoad={init}>
+            <input
+                style={{position: 'absolute', left: 20, top: 20}}
+                type="range"
+                min={-500}
+                max={500}
+                defaultValue={0}
+                onChange={setTilesHeight}
+            />
+        </Viewer>
+    );
 }
-
-/**
- * Returns an object containing the first object intersected by the ray and the position of intersection,
- * or <code>undefined</code> if there were no intersections. The intersected object has a <code>primitive</code>
- * property that contains the intersected primitive. Other properties may be set depending on the type of primitive
- * and may be used to further identify the picked object. The ray must be given in world coordinates.
- * <p>
- * This function only picks globe tiles and 3D Tiles that are rendered in the current view. Picks all other
- * primitives regardless of their visibility.
- * </p>
- *
- * @private
- *
- * @param {Ray} ray The ray.
- * @param {Object[]} [objectsToExclude] A list of primitives, entities, or features to exclude from the ray intersection.
- * @returns {Object} An object containing the object and position of the first intersection.
- *
- * @exception {DeveloperError} Ray intersections are only supported in 3D mode.
- */
-// Scene.prototype.pickFromRay = function(ray, objectsToExclude) {
-
-/**
- * Returns a list of objects, each containing the object intersected by the ray and the position of intersection.
- * The intersected object has a <code>primitive</code> property that contains the intersected primitive. Other
- * properties may also be set depending on the type of primitive and may be used to further identify the picked object.
- * The primitives in the list are ordered by first intersection to last intersection. The ray must be given in
- * world coordinates.
- * <p>
- * This function only picks globe tiles and 3D Tiles that are rendered in the current view. Picks all other
- * primitives regardless of their visibility.
- * </p>
- *
- * @private
- *
- * @param {Ray} ray The ray.
- * @param {Number} [limit=Number.MAX_VALUE] If supplied, stop finding intersections after this many intersections.
- * @param {Object[]} [objectsToExclude] A list of primitives, entities, or features to exclude from the ray intersection.
- * @returns {Object[]} List of objects containing the object and position of each intersection.
- *
- * @exception {DeveloperError} Ray intersections are only supported in 3D mode.
- */
-//Scene.prototype.drillPickFromRay = function(ray, limit, objectsToExclude) {

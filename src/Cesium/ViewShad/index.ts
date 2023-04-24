@@ -1,6 +1,6 @@
 // ViewShed.js
 import * as Cesium from 'cesium';
-import glsl from './glsl';
+import glsl from './frag.glsl';
 /**
  * 可视域分析。
  *
@@ -41,7 +41,7 @@ class ViewShedStage {
     sketch = null;
     frustumOutline = null;
     postStage = null;
-    lightCamera: typeof Cesium.Camera;
+    lightCamera: Cesium.Camera;
     constructor(viewer, options) {
         this.viewer = viewer;
         this.viewPosition = options.viewPosition;
@@ -61,7 +61,7 @@ class ViewShedStage {
         this.invisibleAreaColor = options.invisibleAreaColor || Cesium.Color.RED;
         this.enabled = typeof options.enabled === 'boolean' ? options.enabled : true;
         this.softShadows = typeof options.softShadows === 'boolean' ? options.softShadows : true;
-        this.size = options.size || 2048;
+        this.size = options.size || 4096;
 
         this.update();
     }
@@ -120,6 +120,35 @@ class ViewShedStage {
                 roll: 0,
             },
         });
+    }
+
+    updateLightCamera({viewPosition = this.viewPosition, viewHeading = this.viewHeading, viewPitch = this.viewPitch}) {
+        this.lightCamera.setView({
+            destination: viewPosition,
+            orientation: {
+                heading: Cesium.Math.toRadians(viewHeading),
+                pitch: Cesium.Math.toRadians(viewPitch),
+                roll: 0,
+            },
+        });
+        var i = 0;
+        const timer = setInterval(() => {
+            i += 1;
+            let rotationM = Cesium.Matrix3.fromRotationZ(Cesium.Math.toRadians(i));
+            var res = Cesium.Matrix4.multiplyByMatrix3(
+                this.frustumOutline.modelMatrix,
+                rotationM,
+                this.frustumOutline.modelMatrix
+            );
+            if(i > 10) {
+                clearInterval(timer)
+            }
+        }, 1000);
+
+        this.sketch.orientation = Cesium.Transforms.headingPitchRollQuaternion(
+            this.viewPosition,
+            Cesium.HeadingPitchRoll.fromDegrees(viewHeading - this.horizontalViewAngle, viewPitch, 0.0)
+        );
     }
 
     createShadowMap() {
@@ -198,7 +227,6 @@ class ViewShedStage {
         const scratchRight = new Cesium.Cartesian3(); // 笛卡尔坐标点
         const scratchRotation = new Cesium.Matrix3();
         const scratchOrientation = new Cesium.Quaternion();
-        const position = this.lightCamera.positionWC;
         const direction = this.lightCamera.directionWC;
         const up = this.lightCamera.upWC;
         let right = this.lightCamera.rightWC;
@@ -218,12 +246,11 @@ class ViewShedStage {
             id: Math.random().toString(36).substr(2),
             attributes: {
                 color: Cesium.ColorGeometryInstanceAttribute.fromColor(
-                    Cesium.Color.YELLOWGREEN //new Cesium.Color(0.0, 1.0, 0.0, 1.0)
+                    Cesium.Color.GOLD //new Cesium.Color(0.0, 1.0, 0.0, 1.0)
                 ),
                 show: new Cesium.ShowGeometryInstanceAttribute(true),
             },
         });
-
         this.frustumOutline = this.viewer.scene.primitives.add(
             new Cesium.Primitive({
                 geometryInstances: [instance],
@@ -234,6 +261,7 @@ class ViewShedStage {
             })
         );
     }
+    // 绘制椭球轮廓
     drawSketch() {
         this.sketch = this.viewer.entities.add({
             name: 'sketch',
@@ -255,9 +283,10 @@ class ViewShedStage {
                 subdivisions: 256,
                 stackPartitions: 64,
                 slicePartitions: 64,
-                outlineColor: Cesium.Color.YELLOWGREEN,
+                outlineColor: Cesium.Color.GOLD,
             },
         });
+        console.log(this.sketch);
     }
 }
 // 获取偏航角
